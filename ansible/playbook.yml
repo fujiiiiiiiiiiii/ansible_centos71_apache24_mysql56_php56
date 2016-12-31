@@ -1,0 +1,13 @@
+---
+- name: Install Apache2.4 MySQL:5.6, PHP:5.6
+  hosts: localhost
+
+  #root権限で行う
+  become: true
+
+  roles:
+    - common
+    - mysql
+    - apache
+    - php
+    - phpmyadmin

@@ -1,0 +1,31 @@
+---
+# default document root
+# please change your app directory
+# ex: /vagrant/my_app/public
+default:
+  document_root: /var/www/html
+
+# port
+port:
+  http: 80
+  https: 443
+  mysql: 3306
+  phpmyadmin: 8080
+
+# mysql
+mysql:
+  package: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+  service: mysqld
+  conf_file: /etc/my.cnf
+  password_root: vagrant
+
+# phpMyAdmin
+phpmyadmin:
+  url: https://files.phpmyadmin.net/phpMyAdmin/4.6.5.2/phpMyAdmin-4.6.5.2-all-languages.tar.gz
+  package_filename: phpMyAdmin-4.6.5.2-all-languages
+  work_dir: /usr/local/src
+  deploy_dir: /var/www/
+  home_dir: /var/www/phpMyAdmin
+  config_changes:
+    - regexp: "^(.*blowfish_secret.*) = .*"
+      line: "\\1 = 'passphrase';"

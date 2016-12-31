@@ -1,0 +1,59 @@
+---
+# Ansibleからselinuxを操作するに必要なmoduleインストール
+- name: Install libselinux
+  yum:
+    name=libselinux-python
+    state=present
+
+- name: SELinux permissive
+  selinux:
+    policy=targeted
+    state=permissive
+
+- name: SELinux Disable
+  selinux: state=disabled
+
+- name: Set locale UTF8
+  shell: "localectl set-locale LANG=ja_JP.UTF-8"
+
+- name: Set timezone to Asia/Tokyo
+  timezone: name=Asia/Tokyo
+
+- name: Copy repository definition files
+  copy:
+    src={{ item }}
+    dest=/etc/yum.repos.d/
+  with_items:
+    - epel.repo
+    - remi.repo
+
+# rpm_key moduleでkeyのdownloadしたかったけどうまくいかず
+- name: Add rpm gpg key
+  copy:
+    src={{ item }}
+    dest=/etc/pki/rpm-gpg
+  with_items:
+    - RPM-GPG-KEY-EPEL-7
+    - RPM-GPG-KEY-remi
+
+- name: Stop firewalld
+  service:
+    name=firewalld
+    enabled=false
+    state=stopped
+
+- name: Remove mariadb-libs
+  yum:
+    name=mariadb-libs
+    state=absent
+
+- name: Is vim already installed
+  shell: "which vim"
+  register: is_vim
+  ignore_errors: yes
+
+- name: Install vim
+  yum:
+    name=vim
+    state=present
+  when: is_vim.rc != 0

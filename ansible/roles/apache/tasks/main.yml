@@ -1,0 +1,33 @@
+---
+- name: Is apache already installed
+  shell: "which httpd"
+  register: is_apache
+  ignore_errors: yes
+
+- name: Install apache
+  yum:
+    name=httpd
+    enablerepo=remi
+    state=present
+  when: is_apache.rc != 0
+
+- name: Make default document root directory
+  file:
+    path={{ default.document_root }}
+    state=directory
+    owner=vagrant
+    group=vagrant
+    mode=0755
+
+- name: Start apache
+  service:
+    name=httpd
+    state=started
+    enabled=yes
+
+- name: Copy conf file
+  template:
+    src=httpd.conf
+    dest=/etc/httpd/conf/
+  notify:
+    - restart apache

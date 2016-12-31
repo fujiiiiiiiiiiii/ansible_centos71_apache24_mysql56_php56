@@ -1,0 +1,43 @@
+---
+- name: Is php already installed
+  shell: "which php"
+  register: is_php
+  ignore_errors: yes
+
+- name: Install php
+  yum: name={{ item }}
+    enablerepo=remi,remi-php56
+    state=present
+  with_items:
+    - php
+    - php-common
+    - php-mbstring
+    - php-gd
+    - php-xml
+    - php-pdo
+    - php-zip
+    - php-cli
+    - php-mcrypt
+    - php-memcache
+    - php-mysqli
+    - php-mysqlnd
+  when: is_php.rc != 0
+
+- name: Chown session save
+  file:
+    path=/var/lib/php/session
+    state=directory
+    group=vagrant
+
+- name: Copy php.ini
+  template:
+    src=php.ini
+    dest=/etc/
+  notify: restart apache
+
+- name: Delete unnecessary folders
+  file:
+    path={{ item }}
+    state=absent
+  with_items:
+    - /var/www/cgi-bin

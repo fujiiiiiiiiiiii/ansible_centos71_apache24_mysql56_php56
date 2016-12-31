@@ -1,0 +1,57 @@
+---
+- name: Is MySQL already installed
+  shell: "which mysql"
+  register: is_mysql
+  ignore_errors: yes
+
+- name: Install MySQL package
+  yum:
+    name={{ mysql.package }}
+    state=present
+  when: is_mysql.rc != 0
+
+- name: Install MySQL
+  yum:
+    name={{ item }}
+    state=present
+  with_items:
+    - mysql-community-server
+    - MySQL-python
+    - libsemanage-python
+  when: is_mysql.rc != 0
+
+- name: Copy MySQL conf file
+  template:
+    src=my.cnf.j2
+    dest={{ mysql.conf_file }}
+  notify:
+    - restart mysql
+
+- name: Start MySQL Service
+  service:
+    name=mysql
+    state=started
+    enabled=yes
+
+- name: Delete anonymous user
+  mysql_user:
+    name: ""
+    host_all: yes
+    state: absent
+  when: is_mysql.rc != 0
+
+- name: Delete anonymous user
+  mysql_user:
+    name: ""
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mysql.password_root }}"
+  when: is_mysql.rc == 0
+
+- name: Change root first password
+  mysql_user:
+    name: "root"
+    host_all: yes
+    password: "{{ mysql.password_root }}"
+  ignore_errors: yes
