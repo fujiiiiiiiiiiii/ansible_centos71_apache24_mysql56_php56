@@ -2,6 +2,7 @@
 - name: Is phpMyAdmin already installed
   stat: path={{ phpmyadmin.home_dir }}/index.php
   register: is_phpmyadmin
+  ignore_errors: yes
 
 - name: Create phpMyAdmin directory
   file:
